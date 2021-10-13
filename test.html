@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <script
+      src="https://cdnjs.cloudflare.com/ajax/libs/mathjs/9.5.0/math.js"
+      type="text/javascript"
+    ></script>
+  </head>
+  <body>
+    <script type="text/javascript">
+      const beaconAccuracy = {
+        first: 3.83, //0.3-5.6
+        last: 2.47,
+        second: 5.64,
+      };
+      const beaconLatLon = {
+        beacon666: { x: 120.64178998448874, y: 24.17117506181963 },
+        beacon333: { x: 120.64181412436885, y: 24.17126437909835 },
+        beacon711: { x: 120.64174093167196, y: 24.171230755252594 },
+      };
+      const polygonPoints = [
+        [beaconLatLon.beacon666.x, beaconLatLon.beacon666.y],
+        [beaconLatLon.beacon333.x, beaconLatLon.beacon333.y],
+        [beaconLatLon.beacon711.x, beaconLatLon.beacon711.y],
+      ];
+      function blhtoXYZ(polygonPoints) {
+        function _BLH2XYZ(blhObj) {
+          //将大地坐标喜欢换为空间直角坐标系
+          var pi_180 = Math.PI / 180;
+          var projectionTypes = {};
+          projectionTypes.bj54 = {
+            a: 6378245, //长半轴
+            e2: 0.006693421622966, //第一偏心率平方
+          };
+          projectionTypes.wgs84 = {
+            a: 6378135, //长半轴
+            e2: 0.00669437999013, //第一偏心率平方
+          };
+          var e2 = 0.00669437999013;
+          // var a = projectionTypes[projectionType].a;//长半轴
+          var a = 6378135; //长半轴
+          var N =
+            a /
+            Math.sqrt(
+              1 - e2 * Math.sin(blhObj.b * pi_180) * Math.sin(blhObj.b * pi_180)
+            );
+          var X =
+            (N + blhObj.h) *
+            Math.cos(blhObj.b * pi_180) *
+            Math.cos(blhObj.l * pi_180);
+          var Y =
+            (N + blhObj.h) *
+            Math.cos(blhObj.b * pi_180) *
+            Math.sin(blhObj.l * pi_180);
+          var Z = [N * (1 - e2) + blhObj.h] * Math.sin(blhObj.b * pi_180);
+          var resultObj = {};
+          resultObj.X = X;
+          resultObj.Y = Y;
+          resultObj.Z = Z;
+          return resultObj;
+        }
+
+        var newPolygonsArray = [];
+        var arrlen = polygonPoints.length;
+
+        for (var i = 0; i < arrlen; i++) {
+          // console.log(polygonPoints[i])
+          var temp = polygonPoints[i].push(0);
+          var blhobj = {
+            b: polygonPoints[i][0],
+            l: polygonPoints[i][1],
+            h: polygonPoints[i][2],
+          };
+          var xyz = _BLH2XYZ(blhobj);
+          var litarr = [xyz.X, xyz.Y];
+          newPolygonsArray.push(litarr);
+        }
+        return newPolygonsArray;
+      }
+      function weightedPoint(beaconLatLon, beaconAccuracy) {
+        const a = [
+          [
+            2 * (beaconLatLon.first.x - beaconLatLon.last.x),
+            2 * (beaconLatLon.first.y - beaconLatLon.last.y),
+          ],
+          [
+            2 * (beaconLatLon.second.x - beaconLatLon.last.x),
+            2 * (beaconLatLon.second.y - beaconLatLon.last.y),
+          ],
+        ];
+        const b = [
+          [
+            beaconLatLon.first.x ^
+              (2 - beaconLatLon.last.x) ^
+              (2 + beaconLatLon.first.y) ^
+              (2 - beaconLatLon.last.y) ^
+              (2 + beaconAccuracy.last) ^
+              (2 - beaconAccuracy.first) ^
+              2,
+          ],
+          [
+            beaconLatLon.second.x ^
+              (2 - beaconLatLon.last.x) ^
+              (2 + beaconLatLon.second.y) ^
+              (2 - beaconLatLon.last.y) ^
+              (2 + beaconAccuracy.last) ^
+              (2 - beaconAccuracy.second) ^
+              2,
+          ],
+        ];
+        const w = [
+          [1 / beaconAccuracy.first, 0],
+          [0, 1 / beaconAccuracy.second],
+        ];
+        const atw = math.multiply(math.transpose(a), w);
+        const atwa = math.multiply(atw, a);
+        const atwainv = math.inv(atwa); //ata inv
+        const atwainvat = math.multiply(atwainv, math.transpose(a)); //ata inv*at
+        const atwainvatw = math.multiply(atwainvat, w);
+        const atwainvatwb = math.multiply(atwainvatw, b);
+        const adjustpoint = [
+          beaconLatLon.last.x - parseFloat(atwainvatwb[0]),
+          beaconLatLon.last.y - parseFloat(atwainvatwb[1]),
+        ];
+        return adjustpoint;
+      }
+      
+      const beaconLatLondata = {
+        first: { x: blhtoXYZ(polygonPoints)[0][0], y: blhtoXYZ(polygonPoints)[0][1] },
+        second: { x: blhtoXYZ(polygonPoints)[1][0], y: blhtoXYZ(polygonPoints)[1][1]},
+        last: {x: blhtoXYZ(polygonPoints)[2][0], y: blhtoXYZ(polygonPoints)[2][1] }
+      };
+      const delta = weightedPoint(beaconLatLondata, beaconAccuracy);
+      console.log(delta);
+    </script>
+  </body>
+</html>
