@@ -79,7 +79,7 @@ const beaconLatLon = {
     beacon333: { x: 120.64181412436885, y: 24.17126437909835 },
     beacon711: { x: 120.64174093167196, y: 24.171230755252594 }
 }
-const distance=Math.sqrt((-2973109.400933985-(-2973109.4316711384))^2+(-1334370.90434703-(-1334376.4864563972))^2)
+const distance = Math.sqrt((-2973109.400933985 - (-2973109.4316711384)) ^ 2 + (-1334370.90434703 - (-1334376.4864563972)) ^ 2)
 console.log(distance)
 // console.log(beaconLatLon.beacon666)
 
@@ -94,11 +94,11 @@ const data2 = intersection(
 console.log(data, data2)
 
 var polygonPoints =
-[
-    [beaconLatLon.beacon666.x, beaconLatLon.beacon666.y],
-    [beaconLatLon.beacon333.x, beaconLatLon.beacon333.y],
-    [beaconLatLon.beacon711.x, beaconLatLon.beacon711.y]
-];
+    [
+        [beaconLatLon.beacon666.x, beaconLatLon.beacon666.y],
+        [beaconLatLon.beacon333.x, beaconLatLon.beacon333.y],
+        [beaconLatLon.beacon711.x, beaconLatLon.beacon711.y]
+    ];
 
 //大地坐標轉直角坐標
 // function blhtoXYZ(polygonPoints){
@@ -126,10 +126,10 @@ var polygonPoints =
 //         resultObj.Z = Z;
 //         return resultObj;
 //     }
-    
+
 //     var newPolygonsArray = [];
 //     var arrlen = polygonPoints.length;
-    
+
 //     for (var i = 0; i < arrlen; i++) {
 //         // console.log(polygonPoints[i])
 //         var temp = polygonPoints[i].push(0);
@@ -143,3 +143,40 @@ var polygonPoints =
 // const aa=blhtoXYZ(polygonPoints)//aa[0][0]--->第一筆資料的x     aa[0][1]--->第一筆資料的y以此類推
 // console.log(aa[0][0],aa[0][1])
 
+function _XYZ2BLH(xyz1) {
+
+    var _180_pi = 180 / Math.PI;
+    var a = 6378135
+    var e2 = 0.00669437999013;//第一偏心率平方值
+    var X = xyz1.X;
+    var Y = xyz1.Y;
+    var Z = xyz1.Z;
+    var L = Math.atan(Y / X) * _180_pi;
+    var B = Math.atan(Z / Math.sqrt(X * X + Y * Y));
+    console.log(X, Y, Z, L, B)
+
+    var N = a / Math.sqrt(1 - e2 * Math.sin(B) * Math.sin(B));
+
+    var H = Z / Math.sin(B) - N * (1 - e2);
+    console.log(B)
+    B = B * _180_pi;
+    console.log(B)
+    var resultObj = {};
+    resultObj.L = L;
+    resultObj.B = B;
+    resultObj.H = H;
+    if (resultObj.B < 0) {
+        resultObj.B = resultObj.B + 180;
+    }
+    if (resultObj.L < 0) {
+        resultObj.L = resultObj.L + 180;
+    }
+    return resultObj;
+}
+const xyz1 = {
+    X: -2973108.1352892383,
+    Y: -1334366.8293782612,
+    Z: 5596897.7538525835
+}
+const aa=_XYZ2BLH(xyz1)
+console.log(aa)
