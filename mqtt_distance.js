@@ -1,133 +1,34 @@
-var _180_pi = 180 / Math.PI;
-function intersection(c1, c2) {
-    // Start constructing the response object.
-    const result = {
-        intersect_count: 0,
-        intersect_occurs: true,
-        one_is_in_other: false,
-        are_equal: false,
-        point_1: { x: null, y: null },
-        point_2: { x: null, y: null },
-    };
-
-    // Get vertical and horizontal distances between circles.
-    const dx = c2.x - c1.x;
-    const dy = c2.y - c1.y;
-
-    // Calculate the distance between the circle centers as a straight line.
-    const dist = Math.hypot(dy, dx);
-
-    // Check if circles intersect.
-    if (dist > c1.r + c2.r) {
-        result.intersect_occurs = false;
-    }
-
-    // Check one circle isn't inside the other.
-    if (dist < Math.abs(c1.r - c2.r)) {
-        result.intersect_occurs = false;
-        result.one_is_in_other = true;
-    }
-
-    // Check if circles are the same.
-    if (c1.x === c2.x && c1.y === c2.y && c1.r === c2.r) {
-        result.are_equal = true;
-        result.are_equal = true;
-    }
-
-    // Find the intersection points
-    if (result.intersect_occurs) {
-        // Centroid is the pt where two lines cross. A line between the circle centers
-        // and a line between the intersection points.
-        const centroid = (c1.r * c1.r - c2.r * c2.r + dist * dist) / (2.0 * dist);
-
-        // Get the coordinates of centroid.
-        const x2 = c1.x + (dx * centroid) / dist;
-        const y2 = c1.y + (dy * centroid) / dist;
-
-        // Get the distance from centroid to the intersection points.
-        const h = Math.sqrt(c1.r * c1.r - centroid * centroid);
-
-        // Get the x and y dist of the intersection points from centroid.
-        const rx = -dy * (h / dist);
-        const ry = dx * (h / dist);
-
-        // Get the intersection points.
-        result.point_1.x = Number((x2 + rx).toFixed(15));
-        result.point_1.y = Number((y2 + ry).toFixed(15));
-
-        result.point_2.x = Number((x2 - rx).toFixed(15));
-        result.point_2.y = Number((y2 - ry).toFixed(15));
-
-        // Add intersection count to results
-        if (result.are_equal) {
-            result.intersect_count = null;
-        } else if (result.point_1.x === result.point_2.x && result.point_1.y === result.point_2.y) {
-            result.intersect_count = 1;
-        } else {
-            result.intersect_count = 2;
-        }
-    }
-    return result;
-}
-// [{“minor”:333,“rssi”:-54,“major”:333,“proximity”:“ProximityNear”,“accuracy”:0.47,“uuid”:“015E2CC7-D3F0-4275-B67B-2F930DD63013"},{“minor”:711,“rssi”:-44,“major”:7,“proximity”:“ProximityNear”,“accuracy”:0.64,“uuid”:“015E2CC7-D3F0-4275-B67B-2F930DD63013"},{“minor”:666,“rssi”:-58,“major”:666,“proximity”:“ProximityNear”,“accuracy”:0.83,“uuid”:“015E2CC7-D3F0-4275-B67B-2F930DD63013"},{“minor”:713,“rssi”:-56,“major”:7,“proximity”:“ProximityFar”,“accuracy”:3.24,“uuid”:“015E2CC7-D3F0-4275-B67B-2F930DD63013"}]}]]
-const beaconAccuracy = {
-    beacon666: 3.83,//0.3-5.6
-    beacon333: 2.47,
-    beacon711: 5.64
-}
-const beaconLatLon = {
-    beacon666: { x: 120.64178998448874, y: 24.17117506181963 },
-    beacon333: { x: 120.64181412436885, y: 24.17126437909835 },
-    beacon711: { x: 120.64174093167196, y: 24.171230755252594 }
-}
-const distance = Math.sqrt((-2973109.400933985 - (-2973109.4316711384)) ^ 2 + (-1334370.90434703 - (-1334376.4864563972)) ^ 2)
-console.log(distance)
-// console.log(beaconLatLon.beacon666)
-
-const data = intersection(
-    { x: -2973109.400933985, y: -1334370.90434703, r: beaconAccuracy.beacon666 },
-    { x: -2973109.4316711384, y: -1334376.4864563972, r: beaconAccuracy.beacon333 }
-)
-const data2 = intersection(
-    { x: -2973103.814546414, y: -1334371.86919484, r: beaconAccuracy.beacon711 },
-    { x: -2973109.4316711384, y: -1334376.4864563972, r: beaconAccuracy.beacon333 }
-)
-console.log(data, data2)
-
-var polygonPoints =
-    [
-        [beaconLatLon.beacon666.x, beaconLatLon.beacon666.y],
-        [beaconLatLon.beacon333.x, beaconLatLon.beacon333.y],
-        [beaconLatLon.beacon711.x, beaconLatLon.beacon711.y]
-    ];
-
-
-function _XYZ2BLH(xyz1){
+function _XYZ2BLH(xyz1) {
     var a = 6378135;
-    var e2 = 0.006693421622966;//第一偏心率平方值
+    var e2 = 0.006693421622966; //第一偏心率平方值
     var X = xyz1.X;
     var Y = xyz1.Y;
     var Z = xyz1.Z;
-    var L = Math.atan(Y / X) * _180_pi;
+    var L = Math.atan(Y / X) * 180 / Math.PI;
     var B = Math.atan(Z / Math.sqrt(X * X + Y * Y));
-    while(true){//迭代计算
+    while (true) {
+        //迭代计算
         var N = a / Math.sqrt(1 - e2 * Math.sin(B) * Math.sin(B));
-        var tempB = Math.atan((N  * e2 * Math.sin(B) + Z ) / Math.sqrt(X * X + Y * Y ));
-        B = Math.atan((Z + N * e2 * Math.sin(tempB)) / Math.sqrt(X * X + Y * Y ));
-        if(tempB == B){
+        var tempB = Math.atan(
+            (N * e2 * Math.sin(B) + Z) / Math.sqrt(X * X + Y * Y)
+        );
+        B = Math.atan(
+            (Z + N * e2 * Math.sin(tempB)) / Math.sqrt(X * X + Y * Y)
+        );
+        if (tempB == B) {
             break;
         }
     }
     var H = Z / Math.sin(B) - N * (1 - e2);
-    B = B * _180_pi;
+    B = B * 180 / Math.PI;
     var resultObj = {};
     resultObj.L = L;
-    resultObj.B = B;
+    resultObj.B = 180 - B;
     resultObj.H = H;
-    if( resultObj.B < 0 ){
+    if (resultObj.B < 0) {
         resultObj.B = resultObj.B + 180;
     }
-    if(resultObj.L < 0 ){
+    if (resultObj.L < 0) {
         resultObj.L = resultObj.L + 180;
     }
     return resultObj;
@@ -135,7 +36,107 @@ function _XYZ2BLH(xyz1){
 const xyz1 = {
     X: -2973108.1352892383,
     Y: -1334366.8293782612,
-    Z: 5464405.507574263
+    Z: 5464405.507574263,
+};
+
+function blhtoXYZ(polygonPoints) {
+    function _BLH2XYZ(blhObj) {
+        //将大地坐标喜欢换为空间直角坐标系
+        var pi_180 = Math.PI / 180;
+        var projectionTypes = {};
+        projectionTypes.bj54 = {
+            a: 6378245, //长半轴
+            e2: 0.006693421622966, //第一偏心率平方
+        };
+        projectionTypes.wgs84 = {
+            a: 6378135, //长半轴
+            e2: 0.00669437999013, //第一偏心率平方
+        };
+        var e2 = 0.00669437999013;
+        // var a = projectionTypes[projectionType].a;//长半轴
+        var a = 6378135; //长半轴
+        var N =
+            a /
+            Math.sqrt(
+                1 - e2 * Math.sin(blhObj.b * pi_180) * Math.sin(blhObj.b * pi_180)
+            );
+        var X =
+            (N + blhObj.h) *
+            Math.cos(blhObj.b * pi_180) *
+            Math.cos(blhObj.l * pi_180);
+        var Y =
+            (N + blhObj.h) *
+            Math.cos(blhObj.b * pi_180) *
+            Math.sin(blhObj.l * pi_180);
+        var Z = [N * (1 - e2) + blhObj.h] * Math.sin(blhObj.b * pi_180);
+        var resultObj = {};
+        resultObj.X = X;
+        resultObj.Y = Y;
+        resultObj.Z = Z;
+        return resultObj;
+    }
+
+    var newPolygonsArray = [];
+    var arrlen = polygonPoints.length;
+
+    for (var i = 0; i < arrlen; i++) {
+        var temp = polygonPoints[i].push(0);
+        var blhobj = {
+            b: polygonPoints[i][0],
+            l: polygonPoints[i][1],
+            h: polygonPoints[i][2],
+        };
+        var xyz = _BLH2XYZ(blhobj);
+        var litarr = [xyz.X, xyz.Y, xyz.Z];
+        newPolygonsArray.push(litarr);
+    }
+    return newPolygonsArray;
 }
-const aa=_XYZ2BLH(xyz1)
-console.log(aa)
+function weightedPoint(beaconLatLon, beaconAccuracy) {
+    const a = [
+        [
+            2 * (beaconLatLon.first.x - beaconLatLon.last.x),
+            2 * (beaconLatLon.first.y - beaconLatLon.last.y),
+        ],
+        [
+            2 * (beaconLatLon.second.x - beaconLatLon.last.x),
+            2 * (beaconLatLon.second.y - beaconLatLon.last.y),
+        ],
+    ];
+    const b = [
+        [
+            beaconLatLon.first.x ^
+            (2 - beaconLatLon.last.x) ^
+            (2 + beaconLatLon.first.y) ^
+            (2 - beaconLatLon.last.y) ^
+            (2 + beaconAccuracy.last) ^
+            (2 - beaconAccuracy.first) ^
+            2,
+        ],
+        [
+            beaconLatLon.second.x ^
+            (2 - beaconLatLon.last.x) ^
+            (2 + beaconLatLon.second.y) ^
+            (2 - beaconLatLon.last.y) ^
+            (2 + beaconAccuracy.last) ^
+            (2 - beaconAccuracy.second) ^
+            2,
+        ],
+    ];
+    const w = [
+        [1 / beaconAccuracy.first, 0],
+        [0, 1 / beaconAccuracy.second],
+    ];
+    const atw = math.multiply(math.transpose(a), w);
+    const atwa = math.multiply(atw, a);
+    const atwainv = math.inv(atwa); //ata inv
+    const atwainvat = math.multiply(atwainv, math.transpose(a)); //ata inv*at
+    const atwainvatw = math.multiply(atwainvat, w);
+    const atwainvatwb = math.multiply(atwainvatw, b);
+    const adjustpoint = {
+        X: beaconLatLon.last.x - parseFloat(atwainvatwb[0]),
+        Y: beaconLatLon.last.y - parseFloat(atwainvatwb[1]),
+        Z: beaconLatLon.last.z
+    };
+    return adjustpoint;
+}
