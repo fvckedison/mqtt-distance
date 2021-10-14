@@ -36,12 +36,11 @@ function _BLH2XYZ(blhObj) {//將大地坐標喜歡換為空間直角坐標系
     resultObj.Z = Z;
     return resultObj;
 }
-
 var polygonPoints =
     [
-        [118.22166324000011, 33.940180132000084, 27],
-        [118.22166694800001, 33.940138392000051, 27],
-        [118.22167282000009, 33.940096924000045, 27],
+        [120.64178998448874, 24.17117506181963, 27],
+        [120.64181412436885, 24.17126437909835 , 27],
+        [120.64174093167196, 24.171230755252594, 27],
     ];
 var newPolygonsArray = [];
 var arrlen = polygonPoints.length;
@@ -59,3 +58,41 @@ console.log("----", newPolygonsArray)
 for (let i = 0; i < newPolygonsArray.length; i++) {
     console.log(newPolygonsArray[i])
 }
+
+
+function _XYZ2BLH(xyz1){
+    var a = 6378135;
+    var e2 = 0.006693421622966;//第一偏心率平方值
+    var X = xyz1.X;
+    var Y = xyz1.Y;
+    var Z = xyz1.Z;
+    var L = Math.atan(Y / X) * 180 / Math.PI;
+    var B = Math.atan(Z / Math.sqrt(X * X + Y * Y));
+    while(true){//迭代计算
+        var N = a / Math.sqrt(1 - e2 * Math.sin(B) * Math.sin(B));
+        var tempB = Math.atan((N  * e2 * Math.sin(B) + Z ) / Math.sqrt(X * X + Y * Y ));
+        B = Math.atan((Z + N * e2 * Math.sin(tempB)) / Math.sqrt(X * X + Y * Y ));
+        if(tempB == B){
+            break;
+        }
+    }
+    var H = Z / Math.sin(B) - N * (1 - e2);
+    B = B * _180_pi;
+    var resultObj = {};
+    resultObj.L = L;
+    resultObj.B = B;
+    resultObj.H = H;
+    if( resultObj.B < 0 ){
+        resultObj.B = resultObj.B + 180;
+    }
+    if(resultObj.L < 0 ){
+        resultObj.L = resultObj.L + 180;
+    }
+    return resultObj;
+}
+const aaxyz=_XYZ2BLH({
+    X:-2973121.9555147216,
+    Y:-1334376.5390092612,
+    Z:5464402.722454134
+})
+console.log(aaxyz)

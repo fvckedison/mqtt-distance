@@ -1,3 +1,4 @@
+var _180_pi = 180 / Math.PI;
 function intersection(c1, c2) {
     // Start constructing the response object.
     const result = {
@@ -100,75 +101,33 @@ var polygonPoints =
         [beaconLatLon.beacon711.x, beaconLatLon.beacon711.y]
     ];
 
-//大地坐標轉直角坐標
-// function blhtoXYZ(polygonPoints){
-//     function _BLH2XYZ (blhObj) {//将大地坐标喜欢换为空间直角坐标系
-//         var pi_180 = Math.PI / 180;
-//         var projectionTypes = {};
-//         projectionTypes.bj54 = {
-//             a: 6378245,//长半轴
-//             e2: 0.006693421622966//第一偏心率平方
-//         };
-//         projectionTypes.wgs84 = {
-//             a: 6378135,//长半轴
-//             e2: 0.00669437999013//第一偏心率平方
-//         };
-//         var e2 = 0.00669437999013;
-//         // var a = projectionTypes[projectionType].a;//长半轴
-//         var a = 6378135;//长半轴
-//         var N = a / Math.sqrt(1 - e2 * Math.sin(blhObj.b * pi_180) * Math.sin(blhObj.b * pi_180));
-//         var X = (N + blhObj.h) * Math.cos(blhObj.b * pi_180) * Math.cos(blhObj.l * pi_180);
-//         var Y = (N + blhObj.h) * Math.cos(blhObj.b * pi_180) * Math.sin(blhObj.l * pi_180);
-//         var Z = [N * (1 - e2) + blhObj.h] * Math.sin(blhObj.b * pi_180);
-//         var resultObj = {};
-//         resultObj.X = X;
-//         resultObj.Y = Y;
-//         resultObj.Z = Z;
-//         return resultObj;
-//     }
 
-//     var newPolygonsArray = [];
-//     var arrlen = polygonPoints.length;
-
-//     for (var i = 0; i < arrlen; i++) {
-//         // console.log(polygonPoints[i])
-//         var temp = polygonPoints[i].push(0);
-//         var blhobj = { b: polygonPoints[i][0], l: polygonPoints[i][1], h: polygonPoints[i][2] };
-//         var xyz = _BLH2XYZ(blhobj);
-//         var litarr = [xyz.X, xyz.Y];
-//         newPolygonsArray.push(litarr);
-//     }
-//     return newPolygonsArray        
-// }
-// const aa=blhtoXYZ(polygonPoints)//aa[0][0]--->第一筆資料的x     aa[0][1]--->第一筆資料的y以此類推
-// console.log(aa[0][0],aa[0][1])
-
-function _XYZ2BLH(xyz1) {
-
-    var _180_pi = 180 / Math.PI;
-    var a = 6378135
-    var e2 = 0.00669437999013;//第一偏心率平方值
+function _XYZ2BLH(xyz1){
+    var a = 6378135;
+    var e2 = 0.006693421622966;//第一偏心率平方值
     var X = xyz1.X;
     var Y = xyz1.Y;
     var Z = xyz1.Z;
     var L = Math.atan(Y / X) * _180_pi;
     var B = Math.atan(Z / Math.sqrt(X * X + Y * Y));
-    console.log(X, Y, Z, L, B)
-
-    var N = a / Math.sqrt(1 - e2 * Math.sin(B) * Math.sin(B));
-
+    while(true){//迭代计算
+        var N = a / Math.sqrt(1 - e2 * Math.sin(B) * Math.sin(B));
+        var tempB = Math.atan((N  * e2 * Math.sin(B) + Z ) / Math.sqrt(X * X + Y * Y ));
+        B = Math.atan((Z + N * e2 * Math.sin(tempB)) / Math.sqrt(X * X + Y * Y ));
+        if(tempB == B){
+            break;
+        }
+    }
     var H = Z / Math.sin(B) - N * (1 - e2);
-    console.log(B)
     B = B * _180_pi;
-    console.log(B)
     var resultObj = {};
     resultObj.L = L;
     resultObj.B = B;
     resultObj.H = H;
-    if (resultObj.B < 0) {
+    if( resultObj.B < 0 ){
         resultObj.B = resultObj.B + 180;
     }
-    if (resultObj.L < 0) {
+    if(resultObj.L < 0 ){
         resultObj.L = resultObj.L + 180;
     }
     return resultObj;
@@ -176,7 +135,7 @@ function _XYZ2BLH(xyz1) {
 const xyz1 = {
     X: -2973108.1352892383,
     Y: -1334366.8293782612,
-    Z: 5596897.7538525835
+    Z: 5464405.507574263
 }
 const aa=_XYZ2BLH(xyz1)
 console.log(aa)
