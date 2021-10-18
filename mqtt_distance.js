@@ -1,3 +1,16 @@
+function dataVaildation(accuracy, point) {
+    const aDistance = accuracy.a;
+    const bDistance = accuracy.b;
+    const cDistance = accuracy.c;
+    const abDistance = math.sqrt((point.a.x - point.b.x) ^ 2 + (point.a.y - point.b.y) ^ 2)
+    const acDistance = math.sqrt((point.a.x - point.c.x) ^ 2 + (point.a.y - point.c.y) ^ 2)
+    const bcDistance = math.sqrt((point.c.x - point.b.x) ^ 2 + (point.c.y - point.b.y) ^ 2)
+    if (aDistance || bDistance || cDistance < 0) {
+        return false
+    } else if ((aDistance < abDistance || acDistance || bcDistance) && (bDistance < abDistance || acDistance || bcDistance) && (cDistance < abDistance || acDistance || bcDistance)) {
+        return false
+    } else { return ture }
+}
 function _XYZ2BLH(xyz1) {
     var a = 6378135;
     var e2 = 0.006693421622966; //第一偏心率平方值
