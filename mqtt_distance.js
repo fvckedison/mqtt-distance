@@ -6,9 +6,9 @@ function dataVaildation(accuracy, point) {
     const acDistance = math.sqrt((point.a.x - point.c.x) ^ 2 + (point.a.y - point.c.y) ^ 2)
     const bcDistance = math.sqrt((point.c.x - point.b.x) ^ 2 + (point.c.y - point.b.y) ^ 2)
     if (aDistance || bDistance || cDistance < 0) {
-        return false
+        return false, console.log("accuracy出現負值")
     } else if ((aDistance < abDistance || acDistance || bcDistance) && (bDistance < abDistance || acDistance || bcDistance) && (cDistance < abDistance || acDistance || bcDistance)) {
-        return false
+        return false, console.log("出現的點未與三個接收站產生交點")
     } else { return ture }
 }
 function _XYZ2BLH(xyz1) {
