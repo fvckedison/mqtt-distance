@@ -1,3 +1,25 @@
+
+var data = []
+for (var i = 0; i < 5; i++) {
+    data[i] = []
+    for (var j = 0; j < 5; j++) {
+        data[i].push(0)
+    }
+    data[i][i] = "66"
+}
+console.log(data)
+const aaa = [
+    [
+        2 * 5,
+        2 * 6,
+    ],
+    [
+        2 * 7,
+        2 * 8,
+    ],
+];
+console.log(aaa)
+
 function dataVaildation(accuracy, point) {
     const aDistance = accuracy.a;
     const bDistance = accuracy.b;
@@ -106,36 +128,60 @@ function blhtoXYZ(polygonPoints) {
     return newPolygonsArray;
 }
 function weightedPoint(beaconLatLon, beaconAccuracy) {
-    const a = [
-        [
-            2 * (beaconLatLon.first.x - beaconLatLon.last.x),
-            2 * (beaconLatLon.first.y - beaconLatLon.last.y),
-        ],
-        [
-            2 * (beaconLatLon.second.x - beaconLatLon.last.x),
-            2 * (beaconLatLon.second.y - beaconLatLon.last.y),
-        ],
-    ];
-    const b = [
-        [
-            beaconLatLon.first.x ^
-            (2 - beaconLatLon.last.x) ^
-            (2 + beaconLatLon.first.y) ^
-            (2 - beaconLatLon.last.y) ^
-            (2 + beaconAccuracy.last) ^
-            (2 - beaconAccuracy.first) ^
+    const aData = []
+    const bData = []
+    const wData = []
+    for (var i = 0; i < beaconLatLon.length - 1; i++) {
+        aData[i] = [
+            2 * (beaconLatLon[i].x - beaconLatLon[beaconLatLon.length].x),
+            2 * (beaconLatLon[i].y - beaconLatLon[beaconLatLon.length].y)
+        ];
+        bData[i] = [
+            beaconLatLon[i].x ^
+            (2 - beaconLatLon[beaconLatLon.length].x) ^
+            (2 + beaconLatLon[i].y) ^
+            (2 - beaconLatLon[beaconLatLon.length].y) ^
+            (2 + beaconAccuracy[beaconLatLon.length]) ^
+            (2 - beaconAccuracy[i]) ^
             2,
-        ],
-        [
-            beaconLatLon.second.x ^
-            (2 - beaconLatLon.last.x) ^
-            (2 + beaconLatLon.second.y) ^
-            (2 - beaconLatLon.last.y) ^
-            (2 + beaconAccuracy.last) ^
-            (2 - beaconAccuracy.second) ^
-            2,
-        ],
-    ];
+        ];
+        wData[i] = []
+        data[i] = []
+        for (var j = 0; j < beaconLatLon.length - 1; j++) {
+            wData[i].push(0)
+        }
+        wData[i][i] =1 / beaconAccuracy[i]
+    }
+    // const a = [
+    //     [
+    //         2 * (beaconLatLon[0].x - beaconLatLon[beaconLatLon.length].x),
+    //         2 * (beaconLatLon[0].y - beaconLatLon[beaconLatLon.length].y),
+    //     ],
+    //     [
+    //         2 * (beaconLatLon.second.x - beaconLatLon.last.x),
+    //         2 * (beaconLatLon.second.y - beaconLatLon.last.y),
+    //     ],
+    // ];
+    // const b = [
+    //     [
+    //         beaconLatLon.first.x ^
+    //         (2 - beaconLatLon.last.x) ^
+    //         (2 + beaconLatLon.first.y) ^
+    //         (2 - beaconLatLon.last.y) ^
+    //         (2 + beaconAccuracy.last) ^
+    //         (2 - beaconAccuracy.first) ^
+    //         2,
+    //     ],
+    //     [
+    //         beaconLatLon.second.x ^
+    //         (2 - beaconLatLon.last.x) ^
+    //         (2 + beaconLatLon.second.y) ^
+    //         (2 - beaconLatLon.last.y) ^
+    //         (2 + beaconAccuracy.last) ^
+    //         (2 - beaconAccuracy.second) ^
+    //         2,
+    //     ],
+    // ];
     const w = [
         [1 / beaconAccuracy.first, 0],
         [0, 1 / beaconAccuracy.second],
