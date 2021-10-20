@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <script
+      src="https://cdnjs.cloudflare.com/ajax/libs/mathjs/9.5.0/math.js"
+      type="text/javascript"
+    ></script>
+    <script src="https://cdn.jsdelivr.net/npm/@turf/turf@6/turf.min.js"></script>
+  </head>
+  <body>
+    <script type="text/javascript">
+      const data = [
+        {
+          major: 8,
+          minor: 301,
+          latitude: 25.0460866,
+          longitude: 121.5245415,
+          accuracy: 22.25,
+        },
+        {
+          major: 8,
+          minor: 302,
+          latitude: 25.0460777,
+          longitude: 121.5245784,
+          accuracy: 32.9,
+        },
+        {
+          major: 8,
+          minor: 303,
+          latitude: 25.0460368,
+          longitude: 121.5245658,
+          accuracy: 38.98,
+        },
+        {
+          major: 8,
+          minor: 305,
+          latitude: 25.0460966,
+          longitude: 121.5244919,
+          accuracy: 6.44,
+        },
+        {
+          major: 8,
+          minor: 306,
+          latitude: 25.0460571,
+          longitude: 121.524483,
+          accuracy: 5.75,
+        },
+        {
+          major: 307,
+          minor: 307,
+          latitude: 25.0461048,
+          longitude: 121.5244557,
+          accuracy: 0.31,
+        },
+        {
+          major: 8,
+          minor: 308,
+          latitude: 25.0460532,
+          longitude: 121.5244442,
+          accuracy: 29.27,
+        },
+        {
+          major: 8,
+          minor: 309,
+          latitude: 25.046113,
+          longitude: 121.5244215,
+          accuracy: 26.55,
+        },
+        {
+          major: 8,
+          minor: 310,
+          latitude: 25.0460596,
+          longitude: 121.5244086,
+          accuracy: 34.08,
+        },
+      ];
+      //---testing data
+      // var features = turf.points([
+      //   [-97.522259, 35.4691],
+      //   [-97.502754, 35.463455],
+      //   [-97.508269, 35.463245],
+      // ]);
+      var dataArray = [];
+      for (var i = 0; i < data.length; i++) {
+        dataArray.push([data[i].longitude, data[i].latitude]);
+      }
+      var features = turf.points(dataArray);
+      var center = turf.center(features);
+      console.log(center)
+      var from = turf.point([center.geometry.coordinates[0], center.geometry.coordinates[1]]);
+      var options = { units: "meters" };
+
+      for (var i = 0; i < data.length; i++) {
+        dataArray.push([data[i].longitude, data[i].latitude]);
+        var to = turf.point([data[i].longitude, data[i].latitude]);
+        var distance = turf.distance(from, to, options);
+        console.log(distance);
+      }
+    </script>
+  </body>
+</html>
