@@ -142,6 +142,7 @@
       const dataSet = getEachTINSet(tin);
       const minDataSet = getClosestBeacon(accuracyData);
       const constraintTIN = mapClosestBeaconToTIN(tin, minDataSet);
+      
       var points = turf.points([
         [121.5215415, 25.0460468],
         [121.5243215, 25.0460368],
@@ -149,7 +150,8 @@
         [121.5245445, 25.0465668],
         [121.5145415, 25.0420368],
       ]);
-
+      const solution=ptsWithin(points, constraintTIN)
+      console.log(solution)
       //創造三角網
       function createTIN(data) {
         var dataArray = [];
