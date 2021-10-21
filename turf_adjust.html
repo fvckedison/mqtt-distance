@@ -236,7 +236,7 @@
         if (ptsWithin.features.length == 0) {
           return false, console.log("data is not in TIN");
         } else if (ptsWithin.features.length > 0) {
-          return ptsWithin.features;
+          return ptsWithin.features;//0--->longititude     1---->latitude
         } else {
           return false, console.log("error");
         }
