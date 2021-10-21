@@ -15,6 +15,70 @@
           minor: 301,
           latitude: 25.0460866,
           longitude: 121.5245415,
+        },
+        {
+          major: 8,
+          minor: 302,
+          latitude: 25.0460777,
+          longitude: 121.5245784,
+        },
+        {
+          major: 8,
+          minor: 303,
+          latitude: 25.0460368,
+          longitude: 121.5245658,
+        },
+        {
+          major: 8,
+          minor: 305,
+          latitude: 25.0460966,
+          longitude: 121.5244919,
+        },
+        {
+          major: 8,
+          minor: 306,
+          latitude: 25.0460571,
+          longitude: 121.524483,
+          accuracy: 5.75,
+        },
+        {
+          major: 307,
+          minor: 307,
+          latitude: 25.0461048,
+          longitude: 121.5244557,
+        },
+        {
+          major: 8,
+          minor: 308,
+          latitude: 25.0460532,
+          longitude: 121.5244442,
+        },
+        {
+          major: 8,
+          minor: 309,
+          latitude: 25.046113,
+          longitude: 121.5244215,
+        },
+        {
+          major: 8,
+          minor: 310,
+          latitude: 25.0460596,
+          longitude: 121.5244086,
+        },
+        {
+          major: 8,
+          minor: 304,
+          latitude: 25.0460453,
+          longitude: 121.524531,
+        },
+      ];
+
+      const accuracyData = [
+        {
+          major: 8,
+          minor: 301,
+          latitude: 25.0460866,
+          longitude: 121.5245415,
           accuracy: 22.25,
         },
         {
@@ -74,27 +138,108 @@
           accuracy: 34.08,
         },
       ];
-      //---testing data
-      // var features = turf.points([
-      //   [-97.522259, 35.4691],
-      //   [-97.502754, 35.463455],
-      //   [-97.508269, 35.463245],
-      // ]);
-      var dataArray = [];
-      for (var i = 0; i < data.length; i++) {
-        dataArray.push([data[i].longitude, data[i].latitude]);
-      }
-      var features = turf.points(dataArray);
-      var center = turf.center(features);
-      console.log(center)
-      var from = turf.point([center.geometry.coordinates[0], center.geometry.coordinates[1]]);
-      var options = { units: "meters" };
+      const tin = createTIN(data);
+      const dataSet = getEachTINSet(tin);
+      const minDataSet = getClosestBeacon(accuracyData);
+      const constraintTIN = mapClosestBeaconToTIN(tin, minDataSet);
+      var points = turf.points([
+        [121.5215415, 25.0460468],
+        [121.5243215, 25.0460368],
+        [121.5245412, 25.0463368],
+        [121.5245445, 25.0465668],
+        [121.5145415, 25.0420368],
+      ]);
 
-      for (var i = 0; i < data.length; i++) {
-        dataArray.push([data[i].longitude, data[i].latitude]);
-        var to = turf.point([data[i].longitude, data[i].latitude]);
-        var distance = turf.distance(from, to, options);
-        console.log(distance);
+      //創造三角網
+      function createTIN(data) {
+        var dataArray = [];
+        for (var i = 0; i < data.length; i++) {
+          dataArray.push([data[i].longitude, data[i].latitude]);
+        }
+        var features = turf.points(dataArray);
+        var tin = turf.tin(features);
+        return tin;
+      }
+      //判斷是否在特定區
+      function getEachTINSet(tin) {
+        const tin3pts = [];
+        const dataSet = [];
+        for (var i = 0; i < tin.features.length; i++) {
+          const coordinatesData = tin.features[i].geometry.coordinates;
+          for (var j = 0; j < coordinatesData[0].length; j++) {
+            // console.log(coordinatesData[0] )
+            // console.log(coordinatesData[0][j][0])
+            const result = data.filter(
+              (data) =>
+                data.longitude == coordinatesData[0][j][0] &&
+                data.latitude == coordinatesData[0][j][1]
+            );
+            tin3pts.push(result[0].minor);
+          }
+        }
+        for (var i = 1; i < tin3pts.length / 4 + 1; i++) {
+          dataSet.push(tin3pts.slice((i - 1) * 4, i * 4 - 1));
+        }
+        for (var i = 0; i < tin.features.length; i++) {
+          tin.features[i]["BeaconTin"] = dataSet[i];
+        }
+        return dataSet;
+      }
+
+      //將３個beacons組成在三角網做成陣列，並加入到tin.features內
+
+      //判斷是否位於特定三角網內
+      function getClosestBeacon(accuracyData) {
+        const accuaryDataSet = [];
+        const minDataSet = [];
+        for (var i = 0; i < accuracyData.length; i++) {
+          accuaryDataSet.push(accuracyData[i].accuracy);
+        }
+        console.log(accuaryDataSet);
+        const minData = getMinValue(accuaryDataSet, i);
+        for (var i = 0; i < minData.length; i++) {
+          const ref = accuaryDataSet.indexOf(minData[i]);
+          minDataSet.push(accuracyData[ref].minor);
+        }
+        return minDataSet;
+      }
+      //取得accuracy最小三值
+      function getMinValue(arr, i) {
+        const sort = arr.sort(function (a, b) {
+          return a - b;
+        });
+        const min = sort.slice(0, i);
+        return min;
+      }
+      //-----
+      //判斷accuracy最近的beacons是哪三個對應到哪個tin
+
+      function mapClosestBeaconToTIN(tin, minDataSet) {
+        for (var i = 0; i < tin.features.length; i++) {
+          var cnt = 0;
+          for (var j = 0; j < tin.features[i].BeaconTin.length; j++) {
+            for (var k = 0; k < minDataSet.length; k++) {
+              if (tin.features[i].BeaconTin[j] == minDataSet[k]) {
+                cnt = cnt + 1;
+              }
+            }
+            if (cnt == 3) {
+              return tin.features[i];
+            }
+          }
+        }
+      }
+
+      //判斷是否位於最近三角網內
+      function ptsWithin(points, constraintTIN) {
+        var ptsWithin = turf.pointsWithinPolygon(points, constraintTIN);
+        if (ptsWithin.features.length == 0) {
+          return false, console.log("data is not in TIN");
+        } else if (ptsWithin.features.length > 0) {
+          return ptsWithin.features;
+        } else {
+          return false, console.log("error");
+        }
       }
     </script>
   </body>
