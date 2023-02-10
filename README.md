@@ -1,6 +1,6 @@
 # mqtt-distance
 ##### test.html直接使用Live Server跑就可以
-##### 沒有使用node modules import math(矩陣計算)的原因是因為需要使用webpack or express...etc啟用server才能正常使用，所以寫了test.html用cdn方式引用math的包
+
 *   ### _XYZ2BLH(data)直角坐標轉換成BLH(wgs84)經緯度坐標  
     ```
     data=[  
